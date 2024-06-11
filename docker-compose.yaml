@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - '3000:3000'
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres-entry-exit-service:5432/entry_exit_db
+    depends_on:
+      - entry-exit-service
+      - parking-spot-service
+      - payment-service
+
+  entry-exit-service:
+    build: ./entry-exit-service
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres-entry-exit-service:5432/entry_exit_db
+    depends_on:
+      - postgres-entry-exit-service
+
+  parking-spot-service:
+    build: ./parking-spot-service
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres-parking-spot-service:5432/parking_spot_db
+    depends_on:
+      - postgres-parking-spot-service
+
+  payment-service:
+    build: ./payment-service
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres-payment-service:5432/payment_db
+    depends_on:
+      - postgres-payment-service
+
+  postgres-entry-exit-service:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=entry_exit_db
+    volumes:
+      - postgres-entry-exit-data:/var/lib/postgresql/data
+
+  postgres-parking-spot-service:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=parking_spot_db
+    volumes:
+      - postgres-parking-spot-data:/var/lib/postgresql/data
+
+  postgres-payment-service:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=payment_db
+    volumes:
+      - postgres-payment-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-entry-exit-data:
+  postgres-parking-spot-data:
+  postgres-payment-data:

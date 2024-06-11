@@ -1,0 +1,29 @@
+# kubernetes/api-gateway/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+      - name: api-gateway
+        image: your-docker-registry/api-gateway:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: ENTRY_EXIT_SERVICE_URL
+          value: "http://entry-exit-service:3000"
+        - name: PARKING_SPOT_SERVICE_URL
+          value: "http://parking-spot-service:3000"
+        - name: PAYMENT_SERVICE_URL
+          value: "http://payment-service:3000"

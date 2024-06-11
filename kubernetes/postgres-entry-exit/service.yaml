@@ -1,0 +1,14 @@
+# kubernetes/postgres-entry-exit/service.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-entry-exit-service
+spec:
+  selector:
+    app: postgres-entry-exit
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+  type: ClusterIP

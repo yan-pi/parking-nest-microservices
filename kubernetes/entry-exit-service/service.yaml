@@ -1,0 +1,14 @@
+# kubernetes/entry-exit-service/service.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: entry-exit-service
+spec:
+  selector:
+    app: entry-exit-service
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: ClusterIP

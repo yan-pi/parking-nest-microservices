@@ -1,4 +1,4 @@
-# entry-exit-service/Dockerfile
+# payment-service/Dockerfile
 
 # Use Node.js base image
 FROM node:16-alpine

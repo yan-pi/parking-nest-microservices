@@ -1,0 +1,24 @@
+# kubernetes/parking-spot-service/deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: parking-spot-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: parking-spot-service
+  template:
+    metadata:
+      labels:
+        app: parking-spot-service
+    spec:
+      containers:
+      - name: parking-spot-service
+        image: your-docker-registry/parking-spot-service:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: DATABASE_URL
+          value: "postgresql://user:password@postgres-parking-spot-service:5432/parking_spot_db"
