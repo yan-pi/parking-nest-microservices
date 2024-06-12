@@ -1,25 +1,41 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class ParkingSpotService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @Inject('PARKING_SPOT_SERVICE')
+    private readonly parkingSpotService: ClientProxy,
+    private prisma: PrismaService,
+  ) {}
 
   async checkAvailability() {
     return this.prisma.parkingSpot.findMany({ where: { isOccupied: false } });
   }
 
   async allocateSpot(vehicleId: number) {
-    const spot = await this.prisma.parkingSpot.findFirst({
-      where: { isOccupied: false },
-    });
-    if (spot) {
-      await this.prisma.parkingSpot.update({
+    try {
+      const spot = await this.prisma.parkingSpot.findFirst({
+        where: { isOccupied: false },
+      });
+
+      if (!spot) {
+        return null;
+      }
+
+      const updateSpot = await this.prisma.parkingSpot.update({
         where: { id: spot.id },
         data: { isOccupied: true, vehicleId: vehicleId },
       });
-      return spot;
+
+      await this.parkingSpotService
+        .emit('spotAllocated', updateSpot)
+        .toPromise();
+      return updateSpot;
+    } catch (error) {
+      console.log('Error allocating spot', error);
+      throw error;
     }
-    return null;
   }
 }
