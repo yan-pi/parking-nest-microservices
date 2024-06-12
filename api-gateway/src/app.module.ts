@@ -1,9 +1,15 @@
 import { Module } from '@nestjs/common';
-import { EntryExitModule } from './entry-exit/entry-exit.module';
-import { ParkingSpotModule } from './parking-spot/parking-spot.module';
-import { PaymentModule } from './payment/payment.module';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { GatewayController } from './gateway.controller';
 
 @Module({
-  imports: [EntryExitModule, ParkingSpotModule, PaymentModule],
+  imports: [
+    ClientsModule.register([
+      { name: 'ENTRY_EXIT_SERVICE', transport: Transport.RMQ },
+      { name: 'PARKING_SPOT_SERVICE', transport: Transport.RMQ },
+      { name: 'PAYMENT_SERVICE', transport: Transport.RMQ },
+    ]),
+  ],
+  controllers: [GatewayController],
 })
 export class AppModule {}
