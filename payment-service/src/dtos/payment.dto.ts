@@ -6,4 +6,4 @@ export const PaymentSchema = z.object({
   method: z.enum(['cash', 'pix', 'credit_card']),
 });
 
-export type PaymentDTO = z.infer<typeof PaymentSchema>;
+export type CreatePaymentDto = z.infer<typeof PaymentSchema>;

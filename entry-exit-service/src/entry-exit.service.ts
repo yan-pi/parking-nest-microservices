@@ -12,14 +12,16 @@ export class EntryExitService {
   ) {}
 
   async registerEntry(vehicleInfo: VehicleDTO) {
-    // Lógica para registrar a entrada do veículo
+    // Adiciona a tarefa de entrada à fila
     await this.entryExitQueue.add('vehicleEntry', vehicleInfo);
+    // Retorna o registro do veículo (opcional)
     return this.prisma.vehicle.create({ data: vehicleInfo });
   }
 
   async registerExit(vehicleInfo: VehicleDTO) {
-    // Lógica para registrar a saída do veículo
+    // Adiciona a tarefa de saída à fila
     await this.entryExitQueue.add('vehicleExit', vehicleInfo);
+    // Retorna o registro de atualização do veículo (opcional)
     return this.prisma.vehicle.update({
       where: { licensePlate: vehicleInfo.licensePlate },
       data: { exitTime: new Date() },

@@ -1,19 +1,21 @@
 import { Injectable } from '@nestjs/common';
-import { InjectQueue } from '@nestjs/bull';
-import { Queue } from 'bull';
-import { PaymentDTO } from './dtos/payment.dto';
 import { PrismaService } from './prisma.service';
+import { CreatePaymentDto } from './dtos/payment.dto';
 
 @Injectable()
 export class PaymentService {
-  constructor(
-    @InjectQueue('entry-exit-queue') private entryExitQueue: Queue,
-    private prisma: PrismaService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  async processPayment(paymentInfo: PaymentDTO) {
-    // Lógica para processar pagamento
-    await this.entryExitQueue.add('paymentProcessed', paymentInfo);
+  async createPayment(createPaymentDto: CreatePaymentDto) {
+    // Verifique se createPaymentDto.vehicleId está definido
+    const { vehicleId, amount, method } = createPaymentDto;
+
+    const paymentInfo = {
+      vehicleId: vehicleId || undefined, // Pode ser undefined se não estiver definido em createPaymentDto
+      amount,
+      method,
+    };
+
     return this.prisma.payment.create({ data: paymentInfo });
   }
 }
