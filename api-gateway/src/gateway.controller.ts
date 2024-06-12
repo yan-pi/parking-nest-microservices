@@ -1,5 +1,3 @@
-// gateway.controller.ts
-
 import { Controller } from '@nestjs/common';
 import { ClientProxy, MessagePattern } from '@nestjs/microservices';
 
