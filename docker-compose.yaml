@@ -1,83 +1,75 @@
-version: '3.8'
-
+version: '3.7'
 services:
-  rabbitmq:
-    image: rabbitmq:3.8-management
+  api-gateway:
+    build:
+      context: ./api-gateway
     ports:
-      - "5672:5672"  # RabbitMQ
-      - "15672:15672"  # RabbitMQ Management UI
-    networks:
-      - nest-microservices-network
-
-  postgres_entry_exit:
-    image: postgres:latest
-    environment:
-      POSTGRES_DB: entry_exit_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"  # PostgreSQL
-    networks:
-      - nest-microservices-network
-
-  postgres_parking_spot:
-    image: postgres:latest
-    environment:
-      POSTGRES_DB: parking_spot_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5433:5432"  # PostgreSQL
-    networks:
-      - nest-microservices-network
-
-  postgres_payment:
-    image: postgres:latest
-    environment:
-      POSTGRES_DB: payment_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5434:5432"  # PostgreSQL
-    networks:
-      - nest-microservices-network
+      - '3000:3000'
+    depends_on:
+      - rabbitmq
 
   entry-exit-service:
     build:
       context: ./entry-exit-service
-    environment:
-      - RABBITMQ_HOST=rabbitmq
-      - DATABASE_URL=postgresql://postgres:postgres@postgres_entry_exit:5432/entry_exit_db
+    ports:
+      - '3001:3000'
     depends_on:
       - rabbitmq
-      - postgres_entry_exit
-    networks:
-      - nest-microservices-network
-
-  parking-spot-service:
-    build:
-      context: ./parking-spot-service
+      - db_entry_exit
     environment:
-      - RABBITMQ_HOST=rabbitmq
-      - DATABASE_URL=postgresql://postgres:postgres@postgres_parking_spot:5432/parking_spot_db
-    depends_on:
-      - rabbitmq
-      - postgres_parking_spot
-    networks:
-      - nest-microservices-network
+      DATABASE_URL: "postgresql://postgres:password@db_entry_exit/entry_exit_service"
 
   payment-service:
     build:
       context: ./payment-service
-    environment:
-      - RABBITMQ_HOST=rabbitmq
-      - DATABASE_URL=postgresql://postgres:postgres@postgres_payment:5432/payment_db
+    ports:
+      - '3002:3000'
     depends_on:
       - rabbitmq
-      - postgres_payment
-    networks:
-      - nest-microservices-network
+      - db_payment
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@db_payment/payment_service"
 
-networks:
-  nest-microservices-network:
-    driver: bridge
+  parking-spot-service:
+    build:
+      context: ./parking-spot-service
+    ports:
+      - '3003:3000'
+    depends_on:
+      - rabbitmq
+      - db_parking
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@db_parking/parking_spot_service"
+
+  rabbitmq:
+    image: 'rabbitmq:management'
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+
+  db_entry_exit:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: entry_exit_service
+    ports:
+      - "5432:5432"
+
+  db_payment:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: payment_service
+    ports:
+      - "5433:5432"
+
+  db_parking:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: parking_spot_service
+    ports:
+      - "5434:5432"
