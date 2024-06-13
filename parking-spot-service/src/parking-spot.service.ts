@@ -1,49 +1,41 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { InjectQueue } from '@nestjs/bull';
-import { Queue } from 'bull';
+import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
-import { VehicleDTO } from './dtos/parking-spot.dto';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
-export class ParkingSpotService implements OnModuleInit {
+export class ParkingSpotService {
   constructor(
-    @InjectQueue('entry-exit-queue') private entryExitQueue: Queue,
+    @Inject('PARKING_SPOT_SERVICE')
+    private readonly parkingSpotService: ClientProxy,
     private prisma: PrismaService,
   ) {}
 
-  async onModuleInit() {
-    this.entryExitQueue.process('vehicleEntry', async (job) => {
-      const vehicleInfo: VehicleDTO = job.data;
-      // Lógica para verificar disponibilidade de vagas e alocar
-      const availableSpot = await this.prisma.parkingSpot.findFirst({
-        where: { isOccupied: false },
-      });
-      if (availableSpot) {
-        await this.prisma.parkingSpot.update({
-          where: { id: availableSpot.id },
-          data: { isOccupied: true },
-        });
-      }
-    });
-
-    this.entryExitQueue.process('vehicleExit', async (job) => {
-      const vehicleInfo: VehicleDTO = job.data;
-      // Lógica para liberar a vaga
-      const occupiedSpot = await this.prisma.parkingSpot.findFirst({
-        where: { isOccupied: true, vehicleId: vehicleInfo.id },
-      });
-      if (occupiedSpot) {
-        await this.prisma.parkingSpot.update({
-          where: { id: occupiedSpot.id },
-          data: { isOccupied: false, vehicleId: null },
-        });
-      }
-    });
+  async checkAvailability() {
+    return this.prisma.parkingSpot.findMany({ where: { isOccupied: false } });
   }
 
-  async checkAvailability() {
-    return await this.prisma.parkingSpot.findMany({
-      where: { isOccupied: false },
-    });
+  async allocateSpot(vehicleId: number) {
+    try {
+      const spot = await this.prisma.parkingSpot.findFirst({
+        where: { isOccupied: false },
+      });
+
+      if (!spot) {
+        return null;
+      }
+
+      const updateSpot = await this.prisma.parkingSpot.update({
+        where: { id: spot.id },
+        data: { isOccupied: true, vehicleId: vehicleId },
+      });
+
+      await this.parkingSpotService
+        .emit('spotAllocated', updateSpot)
+        .toPromise();
+      return updateSpot;
+    } catch (error) {
+      console.log('Error allocating spot', error);
+      throw error;
+    }
   }
 }

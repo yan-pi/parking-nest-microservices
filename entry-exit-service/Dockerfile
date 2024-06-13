@@ -1,24 +1,22 @@
-# entry-exit-service/Dockerfile
+# Use a base Node.js image
+FROM node:18-alpine
 
-# Use Node.js base image
-FROM node:16-alpine
-
-# Set working directory
-WORKDIR /usr/src/app
+# Set the working directory
+WORKDIR /app
 
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
+# Copy the rest of the files
+COPY . .
+
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the application code
-COPY . .
-
-# Build the application
+# Build the project
 RUN npm run build
 
-# Expose the port the app runs on
+# Expose the port that the service will use
 EXPOSE 3000
 
 # Command to run the application

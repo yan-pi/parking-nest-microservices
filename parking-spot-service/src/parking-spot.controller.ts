@@ -1,12 +1,18 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
+import { EventPattern } from '@nestjs/microservices';
 import { ParkingSpotService } from './parking-spot.service';
 
-@Controller('parking-spot')
+@Controller()
 export class ParkingSpotController {
   constructor(private readonly parkingSpotService: ParkingSpotService) {}
 
-  @Get('availability')
-  async getAvailability() {
+  @EventPattern('checkAvailability')
+  async handleCheckAvailability() {
     return await this.parkingSpotService.checkAvailability();
+  }
+
+  @EventPattern('allocateSpot')
+  async handleAllocateSpot(vehicleId: number) {
+    return await this.parkingSpotService.allocateSpot(vehicleId);
   }
 }

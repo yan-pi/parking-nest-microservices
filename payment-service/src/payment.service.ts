@@ -1,21 +1,34 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
-import { CreatePaymentDto } from './dtos/payment.dto';
+import { ClientProxy } from '@nestjs/microservices';
+import { PaymentDto } from './dtos/payment.dto';
 
 @Injectable()
 export class PaymentService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject('PAYMENT_SERVICE') private readonly client: ClientProxy,
+    private readonly prisma: PrismaService,
+  ) {}
 
-  async createPayment(createPaymentDto: CreatePaymentDto) {
-    // Verifique se createPaymentDto.vehicleId está definido
-    const { vehicleId, amount, method } = createPaymentDto;
+  async processPayment(paymentDto: PaymentDto) {
+    try {
+      // Verificar se todos os campos obrigatórios estão presentes
+      const payment = await this.prisma.payment.create({
+        data: {
+          vehicleId: paymentDto.vehicleId,
+          amount: paymentDto.amount,
+          method: paymentDto.method,
+        },
+      });
 
-    const paymentInfo = {
-      vehicleId: vehicleId || undefined, // Pode ser undefined se não estiver definido em createPaymentDto
-      amount,
-      method,
-    };
+      // Emitir evento para fila RabbitMQ após o pagamento ser processado
+      await this.client.emit('paymentProcessed', payment).toPromise();
 
-    return this.prisma.payment.create({ data: paymentInfo });
+      return payment;
+    } catch (error) {
+      // Tratamento de erros básico
+      console.error('Error processing payment', error);
+      throw error;
+    }
   }
 }

@@ -1,28 +1,19 @@
-import { Controller, Post, Body, BadRequestException } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
+import { EventPattern } from '@nestjs/microservices';
 import { EntryExitService } from './entry-exit.service';
-import { VehicleSchema, VehicleDTO } from './dtos/entry-exit.dto';
+import { VehicleDTO } from './dtos/entry-exit.dto';
 
-@Controller('entry-exit')
+@Controller()
 export class EntryExitController {
   constructor(private readonly entryExitService: EntryExitService) {}
 
-  @Post('entry')
-  async registerEntry(@Body() vehicleInfo: VehicleDTO) {
-    try {
-      VehicleSchema.parse(vehicleInfo);
-      return await this.entryExitService.registerEntry(vehicleInfo);
-    } catch (error) {
-      throw new BadRequestException(error.errors);
-    }
+  @EventPattern('vehicleEntry')
+  async handleVehicleEntry(data: VehicleDTO) {
+    await this.entryExitService.registerEntry(data);
   }
 
-  @Post('exit')
-  async registerExit(@Body() vehicleInfo: VehicleDTO) {
-    try {
-      VehicleSchema.parse(vehicleInfo);
-      return await this.entryExitService.registerExit(vehicleInfo);
-    } catch (error) {
-      throw new BadRequestException(error.errors);
-    }
+  @EventPattern('vehicleExit')
+  async handleVehicleExit(data: VehicleDTO) {
+    await this.entryExitService.registerExit(data);
   }
 }
