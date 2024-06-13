@@ -1,0 +1,8 @@
+-- CreateTable
+CREATE TABLE "ParkingSpot" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "isOccupied" BOOLEAN NOT NULL DEFAULT false,
+    "vehicleId" INTEGER,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);

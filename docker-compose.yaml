@@ -1,52 +1,24 @@
 version: "3.8"
+
 services:
   rabbitmq:
     image: rabbitmq:3-management
     ports:
       - "5672:5672"
       - "15672:15672"
-
-  db_entry_exit:
-    image: bitnami/postgresql:latest
     environment:
-      POSTGRES_DB: entry_exit_service
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-    ports:
-      - "5433:5432"
-    volumes:
-      - entry_exit_pg_data:/bitnami/postgresql
-
-  db_payment:
-    image: bitnami/postgresql:latest
-    environment:
-      POSTGRES_DB: payment_service
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-    ports:
-      - "5434:5432"
-    volumes:
-      - payment_pg_data:/bitnami/postgresql
-
-  db_parking:
-    image: bitnami/postgresql:latest
-    environment:
-      POSTGRES_DB: parking_spot_service
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-    ports:
-      - "5435:5432"
-    volumes:
-      - parking_spot_pg_data:/bitnami/postgresql
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_PORT: 5672  # Define a porta do RabbitMQ como uma variável de ambiente
 
   entry-exit-service:
     build:
       context: ./entry-exit-service
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: "postgresql://postgres:password@db_entry_exit:5432/entry_exit_service"
+      DATABASE_URL: "file:./dev.db"  # SQLite
+      RABBITMQ_URL: "amqp://rabbitmq:${RABBITMQ_PORT}"
     depends_on:
-      - db_entry_exit
       - rabbitmq
     ports:
       - "3000:3000"
@@ -56,9 +28,9 @@ services:
       context: ./payment-service
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: "postgresql://postgres:password@db_payment:5432/payment_service"
+      DATABASE_URL: "file:./dev.db"  # SQLite
+      RABBITMQ_URL: "amqp://rabbitmq:${RABBITMQ_PORT}"
     depends_on:
-      - db_payment
       - rabbitmq
     ports:
       - "3001:3001"
@@ -68,9 +40,9 @@ services:
       context: ./parking-spot-service
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: "postgresql://postgres:password@db_parking:5432/parking_spot_service"
+      DATABASE_URL: "file:./dev.db"  # SQLite
+      RABBITMQ_URL: "amqp://rabbitmq:${RABBITMQ_PORT}"
     depends_on:
-      - db_parking
       - rabbitmq
     ports:
       - "3002:3002"
@@ -83,10 +55,6 @@ services:
       - entry-exit-service
       - payment-service
       - parking-spot-service
+      - rabbitmq
     ports:
       - "3003:3003"
-
-volumes:
-  entry_exit_pg_data:
-  payment_pg_data:
-  parking_spot_pg_data:
