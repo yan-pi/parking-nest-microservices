@@ -1,75 +1,73 @@
-version: '3.7'
+version: "3.7"
 services:
-  api-gateway:
-    build:
-      context: ./api-gateway
-    ports:
-      - '3000:3000'
-    depends_on:
-      - rabbitmq
-
-  entry-exit-service:
-    build:
-      context: ./entry-exit-service
-    ports:
-      - '3001:3000'
-    depends_on:
-      - rabbitmq
-      - db_entry_exit
-    environment:
-      DATABASE_URL: "postgresql://postgres:password@db_entry_exit/entry_exit_service"
-
-  payment-service:
-    build:
-      context: ./payment-service
-    ports:
-      - '3002:3000'
-    depends_on:
-      - rabbitmq
-      - db_payment
-    environment:
-      DATABASE_URL: "postgresql://postgres:password@db_payment/payment_service"
-
-  parking-spot-service:
-    build:
-      context: ./parking-spot-service
-    ports:
-      - '3003:3000'
-    depends_on:
-      - rabbitmq
-      - db_parking
-    environment:
-      DATABASE_URL: "postgresql://postgres:password@db_parking/parking_spot_service"
-
   rabbitmq:
-    image: 'rabbitmq:management'
+    image: rabbitmq:3-management
     ports:
-      - '5672:5672'
-      - '15672:15672'
+      - "5672:5672"
+      - "15672:15672"
 
   db_entry_exit:
-    image: postgres:latest
+    image: bitnami/postgresql:latest
     environment:
+      POSTGRES_DB: entry_exit_service
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: entry_exit_service
     ports:
       - "5432:5432"
 
   db_payment:
-    image: postgres:latest
+    image: bitnami/postgresql:latest
     environment:
+      POSTGRES_DB: payment_service
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: payment_service
     ports:
-      - "5433:5432"
+      - "5433:5433"
 
   db_parking:
-    image: postgres:latest
+    image: bitnami/postgresql:latest
     environment:
+      POSTGRES_DB: parking_spot_service
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: parking_spot_service
     ports:
-      - "5434:5432"
+      - "5434:5434"
+
+  entry-exit-service:
+    build:
+      context: ./entry-exit-service
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@db_entry_exit:5432/entry_exit_service"
+    depends_on:
+      - db_entry_exit
+      - rabbitmq
+
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@db_payment:5433/payment_service"
+    depends_on:
+      - db_payment
+      - rabbitmq
+
+  parking-spot-service:
+    build:
+      context: ./parking-spot-service
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@db_parking:5434/parking_spot_service"
+    depends_on:
+      - db_parking
+      - rabbitmq
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    depends_on:
+      - entry-exit-service
+      - payment-service
+      - parking-spot-service
