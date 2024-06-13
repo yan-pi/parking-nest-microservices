@@ -1,26 +1,29 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Inject } from '@nestjs/common';
 import { ClientProxy, MessagePattern } from '@nestjs/microservices';
 
 @Controller()
 export class GatewayController {
   constructor(
-    private readonly entryExitService: ClientProxy,
-    private readonly parkingSpotService: ClientProxy,
-    private readonly paymentService: ClientProxy,
+    @Inject('ENTRY_EXIT_SERVICE')
+    private readonly entryExitServiceClient: ClientProxy,
+    @Inject('PARKING_SPOT_SERVICE')
+    private readonly parkingSpotServiceClient: ClientProxy,
+    @Inject('PAYMENT_SERVICE')
+    private readonly paymentServiceClient: ClientProxy,
   ) {}
 
   @MessagePattern('entry_exit')
   async handleEntryExitRequest(data: any) {
-    return this.entryExitService.send('entry_exit', data).toPromise();
+    return this.entryExitServiceClient.send('entry_exit', data).toPromise();
   }
 
   @MessagePattern('parking_spot')
   async handleParkingSpotRequest(data: any) {
-    return this.parkingSpotService.send('parking_spot', data).toPromise();
+    return this.parkingSpotServiceClient.send('parking_spot', data).toPromise();
   }
 
   @MessagePattern('payment')
   async handlePaymentRequest(data: any) {
-    return this.paymentService.send('payment', data).toPromise();
+    return this.paymentServiceClient.send('payment', data).toPromise();
   }
 }
