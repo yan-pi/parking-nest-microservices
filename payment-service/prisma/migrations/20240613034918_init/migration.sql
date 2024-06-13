@@ -1,0 +1,8 @@
+-- CreateTable
+CREATE TABLE "Payment" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "vehicleId" INTEGER NOT NULL,
+    "amount" REAL NOT NULL,
+    "method" TEXT NOT NULL,
+    "timestamp" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
