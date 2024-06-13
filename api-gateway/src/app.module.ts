@@ -9,7 +9,7 @@ import { GatewayController } from './gateway.controller';
         name: 'ENTRY_EXIT_SERVICE',
         transport: Transport.RMQ,
         options: {
-          urls: ['amqp://localhost:5672'],
+          urls: ['amqp://rabbitmq:5672'], // Alterado para 'rabbitmq' em vez de 'localhost'
           queue: 'entry-exit-queue',
           queueOptions: {
             durable: false,
@@ -20,7 +20,7 @@ import { GatewayController } from './gateway.controller';
         name: 'PARKING_SPOT_SERVICE',
         transport: Transport.RMQ,
         options: {
-          urls: ['amqp://localhost:5672'],
+          urls: ['amqp://rabbitmq:5672'], // Alterado para 'rabbitmq' em vez de 'localhost'
           queue: 'parking-spot-queue',
           queueOptions: {
             durable: false,
@@ -31,7 +31,7 @@ import { GatewayController } from './gateway.controller';
         name: 'PAYMENT_SERVICE',
         transport: Transport.RMQ,
         options: {
-          urls: ['amqp://localhost:5672'],
+          urls: ['amqp://rabbitmq:5672'], // Alterado para 'rabbitmq' em vez de 'localhost'
           queue: 'payment-queue',
           queueOptions: {
             durable: false,
