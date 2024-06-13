@@ -11,7 +11,7 @@ import { PrismaService } from './prisma.service';
         name: 'PAYMENT_SERVICE',
         transport: Transport.RMQ,
         options: {
-          urls: ['amqp://guest:guest@localhost:5672'],
+          urls: ['amqp://localhost:5672'],
           queue: 'payment-queue',
           queueOptions: {
             durable: false,
