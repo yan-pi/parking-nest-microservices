@@ -17,7 +17,7 @@ RUN npm install
 RUN npm run build
 
 # Expose the port that the service will use
-EXPOSE 3000
+EXPOSE 3003
 
 # Command to run the application
 CMD ["node", "dist/main"]

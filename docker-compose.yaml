@@ -1,4 +1,4 @@
-version: "3.7"
+version: "3.8"
 services:
   rabbitmq:
     image: rabbitmq:3-management
@@ -13,7 +13,9 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     ports:
-      - "5432:5432"
+      - "5433:5432"
+    volumes:
+      - entry_exit_pg_data:/bitnami/postgresql
 
   db_payment:
     image: bitnami/postgresql:latest
@@ -22,7 +24,9 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     ports:
-      - "5433:5433"
+      - "5434:5432"
+    volumes:
+      - payment_pg_data:/bitnami/postgresql
 
   db_parking:
     image: bitnami/postgresql:latest
@@ -31,7 +35,9 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     ports:
-      - "5434:5434"
+      - "5435:5432"
+    volumes:
+      - parking_spot_pg_data:/bitnami/postgresql
 
   entry-exit-service:
     build:
@@ -42,26 +48,32 @@ services:
     depends_on:
       - db_entry_exit
       - rabbitmq
+    ports:
+      - "3000:3000"
 
   payment-service:
     build:
       context: ./payment-service
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: "postgresql://postgres:password@db_payment:5433/payment_service"
+      DATABASE_URL: "postgresql://postgres:password@db_payment:5432/payment_service"
     depends_on:
       - db_payment
       - rabbitmq
+    ports:
+      - "3001:3001"
 
   parking-spot-service:
     build:
       context: ./parking-spot-service
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: "postgresql://postgres:password@db_parking:5434/parking_spot_service"
+      DATABASE_URL: "postgresql://postgres:password@db_parking:5432/parking_spot_service"
     depends_on:
       - db_parking
       - rabbitmq
+    ports:
+      - "3002:3002"
 
   api-gateway:
     build:
@@ -71,3 +83,10 @@ services:
       - entry-exit-service
       - payment-service
       - parking-spot-service
+    ports:
+      - "3003:3003"
+
+volumes:
+  entry_exit_pg_data:
+  payment_pg_data:
+  parking_spot_pg_data:

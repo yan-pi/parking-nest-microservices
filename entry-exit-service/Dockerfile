@@ -13,6 +13,9 @@ COPY . .
 # Install dependencies
 RUN npm install
 
+# Gerar artefatos do Prisma
+RUN npx prisma generate
+
 # Build the project
 RUN npm run build
 

@@ -13,11 +13,14 @@ COPY . .
 # Install dependencies
 RUN npm install
 
+# Gerar artefatos do Prisma
+RUN npx prisma generate
+
 # Build the project
 RUN npm run build
 
 # Expose the port that the service will use
-EXPOSE 3000
+EXPOSE 3002
 
 # Command to run the application
 CMD ["node", "dist/main"]
