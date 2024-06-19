@@ -1,38 +1,37 @@
-# Documentação do Projeto de Microserviços
+**Microservices Project Documentation**
 
-## Sumário
+**Table of Contents**
 
-1. [Introdução](#introdução)
-2. [Arquitetura](#arquitetura)
-3. [Configuração do Ambiente](#configuração-do-ambiente)
-4. [Estrutura do Projeto](#estrutura-do-projeto)
-5. [Configuração dos Microserviços](#configuração-dos-microserviços)
-6. [Testando a Aplicação](#testando-a-aplicação)
-7. [Referências](#referências)
+1. [Introduction](#introduction)
+2. [Architecture](#architecture)
+3. [Environment Setup](#environment-setup)
+4. [Project Structure](#project-structure)
+5. [Microservices Configuration](#microservices-configuration)
+6. [Testing the Application](#testing-the-application)
+7. [References](#references)
 
-## Introdução
+**Introduction**
 
-Este projeto demonstra uma arquitetura de microserviços utilizando NestJS, Prisma, RabbitMQ e SQLite. A aplicação é composta por vários serviços independentes que se comunicam através de um barramento de mensagens (RabbitMQ).
+This project demonstrates a microservices architecture using NestJS, Prisma, RabbitMQ, and SQLite. The application consists of several independent services that communicate through a message bus (RabbitMQ).
 
-## Arquitetura
+**Architecture**
 
-A arquitetura do projeto inclui os seguintes componentes:
+The project architecture includes the following components:
 
-- **RabbitMQ**: Usado para comunicação assíncrona entre os microserviços.
-- **SQLite**: Banco de dados utilizado pelos microserviços.
-- **API Gateway**: Ponto de entrada único para os clientes, responsável por encaminhar as solicitações para os microserviços apropriados.
-- **Microserviços**: Serviços individuais responsáveis por diferentes funcionalidades (entry-exit, parking-spot, payment).
+- **RabbitMQ**: Used for asynchronous communication between microservices.
+- **SQLite**: Database used by the microservices.
+- **API Gateway**: Single entry point for clients, responsible for routing requests to the appropriate microservices.
+- **Microservices**: Individual services responsible for different functionalities (entry-exit, parking-spot, payment).
 
-## Configuração do Ambiente
+**Environment Setup**
 
-### Pré-requisitos
+**Prerequisites**
+- Docker and Docker Compose installed
+- Node.js and npm installed
 
-- Docker e Docker Compose instalados
-- Node.js e npm instalados
+**Starting the Docker Containers**
 
-### Iniciando os Contêineres Docker
-
-Crie um arquivo `docker-compose.yml` com o seguinte conteúdo:
+Create a `docker-compose.yml` file with the following content:
 
 ```yaml
 version: "3.8"
@@ -93,17 +92,17 @@ services:
       - "3003:3003"
 ```
 
-### Executando o Docker Compose
+**Running Docker Compose**
 
-Para iniciar todos os serviços, execute o comando:
+To start all services, run the command:
 
 ```bash
 docker-compose up
 ```
 
-## Estrutura do Projeto
+**Project Structure**
 
-```plaintext
+```
 .
 ├── api-gateway
 │   ├── Dockerfile
@@ -138,11 +137,11 @@ docker-compose up
 └── docker-compose.yml
 ```
 
-## Configuração dos Microserviços
+**Microservices Configuration**
 
-### API Gateway
+**API Gateway**
 
-**app.module.ts**
+*app.module.ts*
 
 ```typescript
 import { Module } from '@nestjs/common';
@@ -194,7 +193,7 @@ import { GatewayService } from './gateway.service';
 export class AppModule {}
 ```
 
-**gateway.controller.ts**
+*gateway.controller.ts*
 
 ```typescript
 import { Controller, Post, Body } from '@nestjs/common';
@@ -217,9 +216,9 @@ export class GatewayController {
 }
 ```
 
-### Entry-Exit Service
+**Entry-Exit Service**
 
-**entry-exit.controller.ts**
+*entry-exit.controller.ts*
 
 ```typescript
 import { Controller } from '@nestjs/common';
@@ -243,47 +242,44 @@ export class EntryExitController {
 }
 ```
 
-## Testando a Aplicação
+**Testing the Application**
 
-### Testando com Postman
+**Testing with Postman**
 
-1. **Iniciar todos os serviços**:
-   Execute `docker-compose up` para iniciar todos os contêineres Docker.
+1. **Start all services**: Run `docker-compose up` to start all Docker containers.
 
-2. **Testar entrada de veículo**: ***(Need to fix)***
-   - Abra o Postman.
-   - Crie uma nova requisição POST para `http://localhost:3003/vehicle/entry`.
-   - No corpo da requisição, adicione um JSON com os dados do veículo:
+2. **Test vehicle entry**:
 
-```json
-{
-  "licensePlate": "ABC1234",
-  "model": "Toyota",
-  "color": "Red"
-}
-```
+   - Open Postman.
+   - Create a new POST request to `http://localhost:3003/vehicle/entry`.
+   - In the request body, add a JSON with the vehicle data:
+     ```json
+     {
+       "licensePlate": "ABC1234",
+       "model": "Toyota",
+       "color": "Red"
+     }
+     ```
+   - Send the request.
 
-   - Envie a requisição.
+3. **Test vehicle exit**:
 
-3. **Testar saída de veículo**:
-   - Crie uma nova requisição POST para `http://localhost:3003/vehicle/exit`.
-   - No corpo da requisição, adicione um JSON com os dados do veículo:
+   - Create a new POST request to `http://localhost:3003/vehicle/exit`.
+   - In the request body, add a JSON with the vehicle data:
+     ```json
+     {
+       "licensePlate": "ABC1234",
+       "model": "Toyota",
+       "color": "Red"
+     }
+     ```
+   - Send the request.
 
-```json
-{
-  "licensePlate": "ABC1234",
-  "model": "Toyota",
-  "color": "Red"
-}
-```
-
-   - Envie a requisição.
-
-## Referências
+**References**
 
 - [NestJS Documentation](https://docs.nestjs.com/)
 - [Prisma Documentation](https://www.prisma.io/docs/)
 - [RabbitMQ Documentation](https://www.rabbitmq.com/documentation.html)
 - [Docker Documentation](https://docs.docker.com/)
 
-Essa documentação básica deve ajudá-lo a entender a configuração e o funcionamento do projeto. Certifique-se de ajustar qualquer detalhe específico à sua implementação conforme necessário.
+This basic documentation should help you understand the setup and operation of the project. Make sure to adjust any specifics to your implementation as necessary.
