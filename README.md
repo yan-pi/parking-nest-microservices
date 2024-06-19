@@ -1,6 +1,6 @@
-**Microservices Project Documentation**
+# **Microservices Project Documentation**
 
-**Table of Contents**
+## **Table of Contents**
 
 1. [Introduction](#introduction)
 2. [Architecture](#architecture)
@@ -10,11 +10,11 @@
 6. [Testing the Application](#testing-the-application)
 7. [References](#references)
 
-**Introduction**
+## **Introduction**
 
 This project demonstrates a microservices architecture using NestJS, Prisma, RabbitMQ, and SQLite. The application consists of several independent services that communicate through a message bus (RabbitMQ).
 
-**Architecture**
+## **Architecture**
 
 The project architecture includes the following components:
 
@@ -23,13 +23,13 @@ The project architecture includes the following components:
 - **API Gateway**: Single entry point for clients, responsible for routing requests to the appropriate microservices.
 - **Microservices**: Individual services responsible for different functionalities (entry-exit, parking-spot, payment).
 
-**Environment Setup**
+## **Environment Setup**
 
-**Prerequisites**
+### **Prerequisites**
 - Docker and Docker Compose installed
 - Node.js and npm installed
 
-**Starting the Docker Containers**
+### **Starting the Docker Containers**
 
 Create a `docker-compose.yml` file with the following content:
 
@@ -92,7 +92,7 @@ services:
       - "3003:3003"
 ```
 
-**Running Docker Compose**
+### **Running Docker Compose**
 
 To start all services, run the command:
 
@@ -100,7 +100,7 @@ To start all services, run the command:
 docker-compose up
 ```
 
-**Project Structure**
+## **Project Structure**
 
 ```
 .
@@ -137,9 +137,9 @@ docker-compose up
 └── docker-compose.yml
 ```
 
-**Microservices Configuration**
+## **Microservices Configuration**
 
-**API Gateway**
+### **API Gateway**
 
 *app.module.ts*
 
@@ -216,7 +216,7 @@ export class GatewayController {
 }
 ```
 
-**Entry-Exit Service**
+### **Entry-Exit Service**
 
 *entry-exit.controller.ts*
 
@@ -242,9 +242,9 @@ export class EntryExitController {
 }
 ```
 
-**Testing the Application**
+## **Testing the Application**
 
-**Testing with Postman**
+### **Testing with Postman**
 
 1. **Start all services**: Run `docker-compose up` to start all Docker containers.
 
@@ -275,7 +275,7 @@ export class EntryExitController {
      ```
    - Send the request.
 
-**References**
+## **References**
 
 - [NestJS Documentation](https://docs.nestjs.com/)
 - [Prisma Documentation](https://www.prisma.io/docs/)
