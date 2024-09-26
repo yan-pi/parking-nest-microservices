@@ -1,4 +1,4 @@
-version: "3.8"
+version: "4"
 
 services:
   rabbitmq:
@@ -9,19 +9,22 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
-      RABBITMQ_PORT: 5672  # Define a porta do RabbitMQ como uma variável de ambiente
-
+      RABBITMQ_PORT: 5672  
+    networks:
+      - api_network
   entry-exit-service:
     build:
       context: ./entry-exit-service
       dockerfile: Dockerfile
     environment:
       DATABASE_URL: "file:./dev.db"  # SQLite
-      RABBITMQ_URL: "amqp://rabbitmq:${RABBITMQ_PORT}"
+      RABBITMQ_URL: "amqp://rabbitmq:5672" #Criar variável de porta para rbtmq
     depends_on:
       - rabbitmq
     ports:
       - "3000:3000"
+    networks:
+      - api_network
 
   payment-service:
     build:
@@ -29,11 +32,13 @@ services:
       dockerfile: Dockerfile
     environment:
       DATABASE_URL: "file:./dev.db"  # SQLite
-      RABBITMQ_URL: "amqp://rabbitmq:${RABBITMQ_PORT}"
+      RABBITMQ_URL: "amqp://rabbitmq:5672"
     depends_on:
       - rabbitmq
     ports:
-      - "3001:3001"
+      - "3001:3001"    
+    networks:
+      - api_network
 
   parking-spot-service:
     build:
@@ -41,12 +46,13 @@ services:
       dockerfile: Dockerfile
     environment:
       DATABASE_URL: "file:./dev.db"  # SQLite
-      RABBITMQ_URL: "amqp://rabbitmq:${RABBITMQ_PORT}"
+      RABBITMQ_URL: "amqp://rabbitmq:5672"
     depends_on:
       - rabbitmq
     ports:
       - "3002:3002"
-
+    networks:
+      - api_network
   api-gateway:
     build:
       context: ./api-gateway
@@ -58,3 +64,11 @@ services:
       - rabbitmq
     ports:
       - "3003:3003"
+    networks:
+      - api_network
+
+networks:
+  api_network:
+   driver: bridge
+
+#Beijos do tio dudu <3
