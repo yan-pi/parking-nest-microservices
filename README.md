@@ -34,62 +34,80 @@ The project architecture includes the following components:
 Create a `docker-compose.yml` file with the following content:
 
 ```yaml
-version: "3.8"
+version: "4"
+
 services:
   rabbitmq:
     image: rabbitmq:3-management
     ports:
       - "5672:5672"
       - "15672:15672"
-
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_PORT: 5672  
+    networks:
+      - api_network
   entry-exit-service:
     build:
       context: ./entry-exit-service
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: "file:./dev.db"
-      RABBITMQ_URL: "amqp://rabbitmq:5672"
+      DATABASE_URL: "file:./dev.db"  # SQLite
+      RABBITMQ_URL: "amqp://rabbitmq:5672" #Criar variável de porta para rbtmq
     depends_on:
       - rabbitmq
     ports:
       - "3000:3000"
-
-  parking-spot-service:
-    build:
-      context: ./parking-spot-service
-      dockerfile: Dockerfile
-    environment:
-      DATABASE_URL: "file:./dev.db"
-      RABBITMQ_URL: "amqp://rabbitmq:5672"
-    depends_on:
-      - rabbitmq
-    ports:
-      - "3001:3001"
+    networks:
+      - api_network
 
   payment-service:
     build:
       context: ./payment-service
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: "file:./dev.db"
+      DATABASE_URL: "file:./dev.db"  # SQLite
+      RABBITMQ_URL: "amqp://rabbitmq:5672"
+    depends_on:
+      - rabbitmq
+    ports:
+      - "3001:3001"    
+    networks:
+      - api_network
+
+  parking-spot-service:
+    build:
+      context: ./parking-spot-service
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: "file:./dev.db"  # SQLite
       RABBITMQ_URL: "amqp://rabbitmq:5672"
     depends_on:
       - rabbitmq
     ports:
       - "3002:3002"
-
+    networks:
+      - api_network
   api-gateway:
     build:
       context: ./api-gateway
       dockerfile: Dockerfile
-    environment:
-      RABBITMQ_URL: "amqp://rabbitmq:5672"
     depends_on:
       - entry-exit-service
-      - parking-spot-service
       - payment-service
+      - parking-spot-service
+      - rabbitmq
     ports:
       - "3003:3003"
+    networks:
+      - api_network
+
+networks:
+  api_network:
+   driver: bridge
+
+#Beijos do tio dudu <3
 ```
 
 ### **Running Docker Compose**
