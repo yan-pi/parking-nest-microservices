@@ -12,6 +12,7 @@ services:
       RABBITMQ_PORT: 5672  
     networks:
       - api_network
+
   entry-exit-service:
     build:
       context: ./entry-exit-service
@@ -53,6 +54,7 @@ services:
       - "3002:3002"
     networks:
       - api_network
+
   api-gateway:
     build:
       context: ./api-gateway
